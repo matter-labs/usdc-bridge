@@ -1,0 +1,16 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+auto_detect_solc = true
+fs_permissions = [{ access = "read-write", path = "./deployments" }]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[etherscan]
+sepoliaTestnet = { key = "${ETHERSCAN_API_KEY}", url = "${SEPOLIA_VERIFIER_URL}", chain = 11155111 }
+sophonTestnet = { key = "${ETHERSCAN_API_KEY}", url = "${SOPHON_SEPOLIA_VERIFIER_URL}", chain = 531050104 } 
+
+[rpc_endpoints]
+sepoliaTestnet = "${SEPOLIA_RPC_URL}"
+sophonTestnet = "${SOPHON_RPC_URL}"
