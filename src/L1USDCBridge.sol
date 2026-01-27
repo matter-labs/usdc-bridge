@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -11,7 +11,8 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {IL1ERC20Bridge} from "@era-contracts/l1-contracts/contracts/bridge/interfaces/IL1ERC20Bridge.sol";
 import {IL1SharedBridge} from "./interfaces/IL1SharedBridge.sol";
-import {IL2Bridge} from "@era-contracts/l1-contracts/contracts/bridge/interfaces/IL2Bridge.sol";
+import {IL2SharedBridgeLegacyFunctions} from
+    "@era-contracts/l1-contracts/contracts/bridge/interfaces/IL2SharedBridgeLegacyFunctions.sol";
 
 import {IMailbox} from "@era-contracts/l1-contracts/contracts/state-transition/chain-interfaces/IMailbox.sol";
 import {L2Message, TxStatus} from "@era-contracts/l1-contracts/contracts/common/Messaging.sol";
@@ -24,7 +25,8 @@ import {
     L2TransactionRequestDirect
 } from "@era-contracts/l1-contracts/contracts/bridgehub/IBridgehub.sol";
 import {IGetters} from "@era-contracts/l1-contracts/contracts/state-transition/chain-interfaces/IGetters.sol";
-import {L2_BASE_TOKEN_SYSTEM_CONTRACT_ADDR} from "@era-contracts/l1-contracts/contracts/common/L2ContractAddresses.sol";
+import {L2_BASE_TOKEN_SYSTEM_CONTRACT_ADDR} from
+    "@era-contracts/l1-contracts/contracts/common/l2-helpers/L2ContractAddresses.sol";
 
 /// @author Sophon
 /// @notice Forked from ML L1USDCBridge contract
@@ -182,7 +184,7 @@ contract L1USDCBridge is IL1SharedBridge, ReentrancyGuard, Ownable2StepUpgradeab
 
         // Request the finalization of the deposit on the L2 side
         bytes memory l2TxCalldata = abi.encodeCall(
-            IL2Bridge.finalizeDeposit,
+            IL2SharedBridgeLegacyFunctions.finalizeDeposit,
             (_prevMsgSender, _l2Receiver, _l1Token, _depositAmount, abi.encode("USD Coin", "USDC", 6))
         );
 

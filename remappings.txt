@@ -1,4 +1,7 @@
 @era-contracts/=node_modules/era-contracts/
+contracts/=node_modules/era-contracts/l1-contracts/contracts/
 @openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+@openzeppelin/contracts-v4/=node_modules/@openzeppelin/contracts/
 @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
-
+@openzeppelin/contracts-upgradeable-v4/=node_modules/@openzeppelin/contracts-upgradeable/
+forge-std/=lib/forge-std/src/

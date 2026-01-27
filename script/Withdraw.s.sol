@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
-import {IL2SharedBridge} from "@era-contracts/l2-contracts/contracts/bridge/interfaces/IL2SharedBridge.sol";
+import {IL2SharedBridge} from "../src/interfaces/IL2SharedBridge.sol";
 import {DeploymentUtils} from "../utils/DeploymentUtils.sol";
 
 interface Proxy {

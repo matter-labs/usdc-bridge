@@ -48,8 +48,9 @@ contract BridgeScript is Script, DeploymentUtils {
         // // TODO: why baseCost is returning a very high number?
         // console.log("Base cost:", baseCost);
 
-        IBridgehub(getDeployedContract("Bridgehub")).requestL2TransactionTwoBridges( // No vale needed if base token is not ETH (e.g SOPH)
-            L2TransactionRequestTwoBridgesOuter({
+        IBridgehub(getDeployedContract("Bridgehub"))
+            .requestL2TransactionTwoBridges( // No vale needed if base token is not ETH (e.g SOPH)
+                L2TransactionRequestTwoBridgesOuter({
                 chainId: CHAIN_ID,
                 mintValue: 10e18, // base tokens (SOPH for Sophon Sepolia, ETH for Sepolia)
                 // mintValue: baseCost,
@@ -61,7 +62,7 @@ contract BridgeScript is Script, DeploymentUtils {
                 secondBridgeValue: 0,
                 secondBridgeCalldata: depositData
             })
-        );
+            );
     }
 
     function approve(address token, uint256 amount) public {

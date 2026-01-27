@@ -11,9 +11,8 @@ contract InitialiseL1USDCBridge is Script, DeploymentUtils {
 
         uint256 sophonSepoliaChainId = vm.envUint("SOPHON_SEPOLIA_CHAIN_ID");
         // if first time, call initializeChainGovernance, else call reinitializeChainGovernance
-        L1USDCBridge(getDeployedContract("L1USDCBridge")).initializeChainGovernance(
-            sophonSepoliaChainId, getDeployedContract("L2USDCBridge", sophonSepoliaChainId)
-        );
+        L1USDCBridge(getDeployedContract("L1USDCBridge"))
+            .initializeChainGovernance(sophonSepoliaChainId, getDeployedContract("L2USDCBridge", sophonSepoliaChainId));
         // L1USDCBridge(getDeployedContract("L1USDCBridge")).reinitializeChainGovernance(
         //     sophonSepoliaChainId, getDeployedContract("L2USDCBridge", sophonSepoliaChainId)
         // );

@@ -8,7 +8,7 @@
   "devDependencies": {
     "@openzeppelin/contracts": "4.9.5",
     "@openzeppelin/contracts-upgradeable": "4.9.5",
-    "era-contracts": "https://github.com/matter-labs/era-contracts.git"
+    "era-contracts": "https://github.com/matter-labs/era-contracts.git#fe2c013ac77761d7ad501c3a74a202b414e85889"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

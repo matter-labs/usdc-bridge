@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import {StdStorage, stdStorage} from "forge-std/Test.sol";
 import {Test} from "forge-std/Test.sol";
@@ -118,14 +118,12 @@ contract L1USDCBridgeTest is Test {
     }
 
     function _setSharedBridgeDepositHappened(uint256 _chainId, bytes32 _txHash, bytes32 _txDataHash) internal {
-        stdstore.target(address(sharedBridge)).sig(sharedBridge.depositHappened.selector).with_key(_chainId).with_key(
-            _txHash
-        ).checked_write(_txDataHash);
+        stdstore.target(address(sharedBridge)).sig(sharedBridge.depositHappened.selector).with_key(_chainId)
+            .with_key(_txHash).checked_write(_txDataHash);
     }
 
     function _setSharedBridgeChainBalance(uint256 _chainId, address _token, uint256 _value) internal {
-        stdstore.target(address(sharedBridge)).sig(sharedBridge.chainBalance.selector).with_key(_chainId).with_key(
-            _token
-        ).checked_write(_value);
+        stdstore.target(address(sharedBridge)).sig(sharedBridge.chainBalance.selector).with_key(_chainId)
+            .with_key(_token).checked_write(_value);
     }
 }

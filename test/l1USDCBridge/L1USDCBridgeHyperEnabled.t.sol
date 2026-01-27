@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import {L1USDCBridgeTest} from "./_L1USDCBridge_Shared.t.sol";
 
@@ -8,7 +8,9 @@ import {IBridgehub} from "@era-contracts/l1-contracts/contracts/bridgehub/IBridg
 import {L2Message, TxStatus} from "@era-contracts/l1-contracts/contracts/common/Messaging.sol";
 import {IMailbox} from "@era-contracts/l1-contracts/contracts/state-transition/chain-interfaces/IMailbox.sol";
 import {IL1ERC20Bridge} from "@era-contracts/l1-contracts/contracts/bridge/interfaces/IL1ERC20Bridge.sol";
-import {L2_BASE_TOKEN_SYSTEM_CONTRACT_ADDR} from "@era-contracts/l1-contracts/contracts/common/L2ContractAddresses.sol";
+import {
+    L2_BASE_TOKEN_SYSTEM_CONTRACT_ADDR
+} from "@era-contracts/l1-contracts/contracts/common/l2-helpers/L2ContractAddresses.sol";
 
 // note, this should be the same as where hyper is disabled
 contract L1USDCBridgeHyperEnabledTest is L1USDCBridgeTest {
@@ -24,12 +26,7 @@ contract L1USDCBridgeHyperEnabledTest is L1USDCBridgeTest {
         );
         bytes32 txDataHash = keccak256(abi.encode(alice, address(token), amount));
         emit BridgehubDepositInitiated({
-            chainId: chainId,
-            txDataHash: txDataHash,
-            from: alice,
-            to: zkSync,
-            l1Token: address(token),
-            amount: amount
+            chainId: chainId, txDataHash: txDataHash, from: alice, to: zkSync, l1Token: address(token), amount: amount
         });
         sharedBridge.bridgehubDeposit(chainId, alice, 0, abi.encode(address(token), amount, bob));
     }

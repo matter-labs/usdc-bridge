@@ -53,14 +53,15 @@ contract FinalizeDepositScript is Script, DeploymentUtils {
         vm.startBroadcast();
 
         (FinalizationData memory data, bytes32[] memory merkleProof) = finalizeWithdrawalParams();
-        L1USDCBridge(getDeployedContract("L1USDCBridge")).finalizeWithdrawal(
-            vm.envUint("SOPHON_SEPOLIA_CHAIN_ID"),
-            data.l1BatchNumber,
-            data.l2MessageIndex,
-            data.l2TxNumberInBlock,
-            data.message,
-            merkleProof
-        );
+        L1USDCBridge(getDeployedContract("L1USDCBridge"))
+            .finalizeWithdrawal(
+                vm.envUint("SOPHON_SEPOLIA_CHAIN_ID"),
+                data.l1BatchNumber,
+                data.l2MessageIndex,
+                data.l2TxNumberInBlock,
+                data.message,
+                merkleProof
+            );
 
         vm.stopBroadcast();
     }

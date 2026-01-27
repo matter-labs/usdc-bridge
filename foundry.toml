@@ -5,6 +5,13 @@ libs = ["lib"]
 auto_detect_solc = true
 fs_permissions = [{ access = "read-write", path = "./deployments" }]
 
+[profile.ci]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+auto_detect_solc = true
+fs_permissions = [{ access = "read-write", path = "./deployments" }]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
 [etherscan]

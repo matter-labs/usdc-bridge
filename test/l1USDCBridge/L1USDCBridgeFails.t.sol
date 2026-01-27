@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import {L1USDCBridgeTest} from "./_L1USDCBridge_Shared.t.sol";
 
@@ -405,7 +405,7 @@ contract L1USDCBridgeFailTest is L1USDCBridgeTest {
         );
 
         // notice that the selector is wrong
-        bytes memory message = abi.encodePacked(IMailbox.proveL2LogInclusion.selector, alice, amount);
+        bytes memory message = abi.encodePacked(bytes4(0xdeadbeef), alice, amount);
 
         vm.expectRevert("USDC-ShB Incorrect message function selector");
         sharedBridge.finalizeWithdrawal({
