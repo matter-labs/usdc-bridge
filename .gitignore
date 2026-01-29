@@ -28,3 +28,6 @@ lib/
 # Coverage
 report/
 lcov.info
+
+# External references
+external/stablecoin-evm/

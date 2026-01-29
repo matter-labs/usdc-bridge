@@ -50,6 +50,11 @@ contract DeployL2USDCBridge is Script, DeploymentUtils {
             ITransparentUpgradeableProxy(payable(sharedBridgeProxy)).upgradeTo(sharedBridgeImpl);
             console.log("L2USDCBridge implementation upgraded @", address(sharedBridgeImpl));
             saveDeployedContract("L2USDCBridge-impl", address(sharedBridgeImpl));
+            try L2USDCBridge(sharedBridgeProxy).initializeV2(msg.sender) {
+                console.log("L2USDCBridge ownership initialized @", msg.sender);
+            } catch {
+                console.log("L2USDCBridge ownership already initialized");
+            }
             return (sharedBridgeProxy, sharedBridgeImpl);
         }
 
@@ -69,6 +74,11 @@ contract DeployL2USDCBridge is Script, DeploymentUtils {
         console.log("L2USDCBridge proxy deployed @", address(sharedBridgeProxy));
         saveDeployedContract("L2USDCBridge", address(sharedBridgeProxy));
         saveDeployedContract("L2USDCBridge-impl", address(sharedBridgeImpl));
+        try L2USDCBridge(sharedBridgeProxy).initializeV2(msg.sender) {
+            console.log("L2USDCBridge ownership initialized @", msg.sender);
+        } catch {
+            console.log("L2USDCBridge ownership already initialized");
+        }
 
         console.log("IMPORTANT: L1USDCBridge must be initialised with the L2USDCBridge address.");
         console.log(

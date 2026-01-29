@@ -34,6 +34,30 @@ contract L2USDCBridgeFailTest is L2USDCBridgeTest {
         bridge.withdraw(bob, address(mockL2Token), 0);
     }
 
+    function test_finalizeDeposit_revertWhenPaused() public {
+        vm.prank(owner);
+        bridge.pause();
+
+        address aliasedL1USDCBridge =
+            address(uint160(l1USDCBridge) + uint160(0x1111000000000000000000000000000000001111));
+        vm.prank(aliasedL1USDCBridge);
+        vm.expectRevert(bytes("USDC-ShB: paused"));
+        bridge.finalizeDeposit(alice, bob, address(mockL2Token), depositAmount, "");
+    }
+
+    function test_withdraw_revertWhenPaused() public {
+        mockL2Token.mint(alice, depositAmount);
+
+        vm.prank(owner);
+        bridge.pause();
+
+        vm.startPrank(alice);
+        mockL2Token.approve(address(bridge), depositAmount);
+        vm.expectRevert("USDC-ShB: paused");
+        bridge.withdraw(bob, address(mockL2Token), depositAmount);
+        vm.stopPrank();
+    }
+
     function test_l1TokenAddress_unsupportedToken() public {
         address randomToken = makeAddr("randomToken");
         vm.expectRevert("Unsupported L2 token");

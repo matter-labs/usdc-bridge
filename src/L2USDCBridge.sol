@@ -31,6 +31,15 @@ contract L2USDCBridge is IL2SharedBridge, Initializable {
     /// @dev The address of the L1 shared bridge counterpart.
     address public override l1USDCBridge;
 
+    /// @dev Owner for pausing and administrative actions.
+    address private _owner;
+
+    /// @dev Pending owner for two-step ownership transfers.
+    address private _pendingOwner;
+
+    /// @dev Pause state for bridging.
+    bool private _paused;
+
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
 
@@ -56,6 +65,15 @@ contract L2USDCBridge is IL2SharedBridge, Initializable {
         l1USDCBridge = _l1USDCBridge;
     }
 
+    /// @notice Initializes ownership and pause state for upgrades.
+    /// @param _ownerAddress The address that can pause/unpause the bridge.
+    function initializeV2(address _ownerAddress) external reinitializer(2) {
+        require(_ownerAddress != address(0), "USDC-ShB: owner 0");
+        _owner = _ownerAddress;
+        _paused = false;
+        emit OwnershipTransferred(address(0), _ownerAddress);
+    }
+
     /// @notice Finalize the deposit and mint funds
     /// @param _l1Sender The account address that initiated the deposit on L1
     /// @param _l2Receiver The account address that would receive minted ether
@@ -65,6 +83,7 @@ contract L2USDCBridge is IL2SharedBridge, Initializable {
     function finalizeDeposit(address _l1Sender, address _l2Receiver, address, uint256 _amount, bytes calldata)
         external
         override
+        whenNotPaused
     {
         // Only the L1 bridge counterpart can initiate and finalize the deposit.
         require(undoL1ToL2Alias(msg.sender) == l1USDCBridge, "mq");
@@ -78,6 +97,7 @@ contract L2USDCBridge is IL2SharedBridge, Initializable {
     /// _l2Token The L2 token address which is withdrawn
     /// @param _amount The total amount of tokens to be withdrawn
     function withdraw(address _l1Receiver, address, uint256 _amount) external override {
+        _requireNotPaused();
         require(_amount > 0, "Amount cannot be zero");
 
         // transfer from msg.sender to here and then burn
@@ -100,6 +120,70 @@ contract L2USDCBridge is IL2SharedBridge, Initializable {
     function l2TokenAddress(address _l1Token) public view override returns (address) {
         require(_l1Token == L1_USDC_TOKEN, "Unsupported L1 token");
         return L2_USDC_TOKEN;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            OWNERSHIP
+    //////////////////////////////////////////////////////////////*/
+
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    modifier onlyOwner() {
+        require(msg.sender == _owner, "USDC-ShB: not owner");
+        _;
+    }
+
+    function owner() external view returns (address) {
+        return _owner;
+    }
+
+    function pendingOwner() external view returns (address) {
+        return _pendingOwner;
+    }
+
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "USDC-ShB: owner 0");
+        _pendingOwner = newOwner;
+        emit OwnershipTransferStarted(_owner, newOwner);
+    }
+
+    function acceptOwnership() external {
+        require(msg.sender == _pendingOwner, "USDC-ShB: not pending owner");
+        address previousOwner = _owner;
+        _owner = msg.sender;
+        delete _pendingOwner;
+        emit OwnershipTransferred(previousOwner, msg.sender);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              PAUSE
+    //////////////////////////////////////////////////////////////*/
+
+    event Paused(address account);
+    event Unpaused(address account);
+
+    modifier whenNotPaused() {
+        _requireNotPaused();
+        _;
+    }
+
+    function paused() external view returns (bool) {
+        return _paused;
+    }
+
+    function pause() external onlyOwner {
+        _paused = true;
+        emit Paused(msg.sender);
+    }
+
+    function unpause() external onlyOwner {
+        _paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    function _requireNotPaused() internal view {
+        require(!_paused, "USDC-ShB: paused");
     }
 
     /*//////////////////////////////////////////////////////////////

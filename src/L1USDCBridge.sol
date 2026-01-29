@@ -28,6 +28,10 @@ import {IGetters} from "@era-contracts/l1-contracts/contracts/state-transition/c
 import {L2_BASE_TOKEN_SYSTEM_CONTRACT_ADDR} from
     "@era-contracts/l1-contracts/contracts/common/l2-helpers/L2ContractAddresses.sol";
 
+interface IFiatTokenBurnable {
+    function burn(uint256 _amount) external;
+}
+
 /// @author Sophon
 /// @notice Forked from ML L1USDCBridge contract
 /// @custom:security-contact security@matterlabs.dev
@@ -70,6 +74,15 @@ contract L1USDCBridge is IL1SharedBridge, ReentrancyGuard, Ownable2StepUpgradeab
     /// @dev The pending admin, i.e. the candidate to the admin role.
     address public pendingAdmin;
 
+    /// @dev Circle-controlled address allowed to burn locked USDC.
+    address public circleBurnCaller;
+
+    /// @dev Finalized bridged supply to burn on L1.
+    uint256 public lockedSupply;
+
+    /// @dev Indicates if the supply lock has been finalized.
+    bool public supplyLockFinalized;
+
     /// @notice Checks that the message sender is the bridgehub.
     modifier onlyBridgehub() {
         require(msg.sender == address(BRIDGE_HUB), "USDC-ShB not BH");
@@ -81,6 +94,10 @@ contract L1USDCBridge is IL1SharedBridge, ReentrancyGuard, Ownable2StepUpgradeab
         require(msg.sender == owner() || msg.sender == admin, "USDC-ShB not owner or admin");
         _;
     }
+
+    event CircleBurnCallerUpdated(address indexed oldCaller, address indexed newCaller);
+    event SupplyLockFinalized(uint256 lockedSupply);
+    event LockedUSDCBurned(address indexed caller, uint256 amount);
 
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Initialize the implementation to prevent Parity hack.
@@ -415,6 +432,41 @@ contract L1USDCBridge is IL1SharedBridge, ReentrancyGuard, Ownable2StepUpgradeab
         } else {
             revert("USDC-ShB Incorrect message function selector");
         }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        USDC STANDARD
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Sets the Circle-controlled address allowed to burn locked USDC.
+    function setCircleBurnCaller(address _caller) external onlyOwner {
+        require(_caller != address(0), "USDC-ShB: circle caller 0");
+        address oldCaller = circleBurnCaller;
+        circleBurnCaller = _caller;
+        emit CircleBurnCallerUpdated(oldCaller, _caller);
+    }
+
+    /// @notice Finalizes the supply lock amount after reconciliation.
+    function finalizeSupplyLock(uint256 _lockedSupply) external onlyOwner whenPaused {
+        require(!supplyLockFinalized, "USDC-ShB: supply lock finalized");
+        require(_lockedSupply > 0, "USDC-ShB: lockedSupply 0");
+        lockedSupply = _lockedSupply;
+        supplyLockFinalized = true;
+        emit SupplyLockFinalized(_lockedSupply);
+    }
+
+    /// @notice Burns the locked USDC balance on L1 during upgrade coordination.
+    function burnLockedUSDC() external whenPaused {
+        require(msg.sender == circleBurnCaller, "USDC-ShB: not circle burn caller");
+        require(supplyLockFinalized, "USDC-ShB: supply not locked");
+        require(lockedSupply > 0, "USDC-ShB: lockedSupply 0");
+
+        uint256 balance = IERC20(L1_USDC_TOKEN).balanceOf(address(this));
+        require(balance >= lockedSupply, "USDC-ShB: lockedSupply exceeds balance");
+
+        IFiatTokenBurnable(L1_USDC_TOKEN).burn(lockedSupply);
+        emit LockedUSDCBurned(msg.sender, lockedSupply);
+        lockedSupply = 0;
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -43,6 +43,7 @@ contract L2USDCBridgeTest is Test {
     address alice;
     address bob;
     address proxyAdmin;
+    address owner;
 
     uint256 depositAmount = 100 ether;
     uint160 constant SYSTEM_CONTRACTS_OFFSET = 0x8000;
@@ -53,6 +54,7 @@ contract L2USDCBridgeTest is Test {
         alice = makeAddr("alice");
         bob = makeAddr("bob");
         proxyAdmin = makeAddr("proxyAdmin");
+        owner = makeAddr("owner");
 
         L2USDCBridge sharedBridgeImpl = new L2USDCBridge(address(mockL2Token), address(mockL2Token));
         TransparentUpgradeableProxy sharedBridgeProxy = new TransparentUpgradeableProxy(
@@ -61,5 +63,6 @@ contract L2USDCBridgeTest is Test {
             abi.encodeWithSelector(L2USDCBridge.initialize.selector, l1USDCBridge)
         );
         bridge = L2USDCBridge(address(sharedBridgeProxy));
+        bridge.initializeV2(owner);
     }
 }
